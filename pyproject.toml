@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "badideas"
+name = "terrible-ideas"
 version = "0.1.0"
 description = "Frequently asked-for missing anti-features"
 authors = ["L3viathan <git@l3vi.de>"]
