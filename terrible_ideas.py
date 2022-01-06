@@ -137,10 +137,10 @@ class WeakTyping(Idea):
         super().disable()
 
 
-def __getattr__(idea):
-    if idea not in IDEAS:
+def __getattr__(attr):
+    if attr not in IDEAS:
         raise AttributeError
-    bad_idea = IDEAS[idea]
-    if bad_idea.enabled is None:
-        bad_idea.enable()
-    return bad_idea
+    idea = IDEAS[attr]
+    if idea.enabled is None:
+        idea.enable()
+    return idea
