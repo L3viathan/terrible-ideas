@@ -4,6 +4,16 @@ import fishhook
 IDEAS = {}
 IS_IPYTHON = hasattr(builtins, "get_ipython")
 
+CHAR_SPLIT_MAP = {
+    "w": "vv",
+    "W": "VV",
+    "m": "nn",
+    "d": "cl",
+    "L": "|_",
+    "X": "><",
+    # etc..
+}
+
 
 class Idea:
     def __init__(self):
@@ -75,6 +85,29 @@ class SpellcheckClasses(Idea):
         builtins.__build_class__ = spelcheck.old
         super().disable()
 
+@register
+class FloatSlicing(Idea):
+    def enable(self):
+        @fishhook.hook(str)
+        def __getitem__(self, something):
+            if not isinstance(something, slice):
+                return fishhook.orig(self, something)
+            start, stop, step = something.start, something.stop, something.step
+            split_start = start % 1 == 0.5 if start else False
+            split_stop = stop % 1 == 0.5 if stop else False
+            if split_start:
+                start = int(start)
+            if split_stop:
+                stop = int(stop) + 1
+            res = fishhook.orig(self, slice(start, stop, step))
+            if split_start:
+                res = CHAR_SPLIT_MAP.get(res[0], (..., res[0]))[1] + res[1:]
+            if split_stop:
+                res = res[:-1] + CHAR_SPLIT_MAP.get(res[-1], (res[-1], ...))[0]
+            return res
+
+    def disable(self):
+        fishhook.unhook(str, "__getitem__")
 
 @register
 class WeakTyping(Idea):
