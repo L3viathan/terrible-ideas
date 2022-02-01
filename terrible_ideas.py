@@ -106,8 +106,11 @@ class FloatSlicing(Idea):
                 res = res[:-1] + CHAR_SPLIT_MAP.get(res[-1], (res[-1], ...))[0]
             return res
 
+        super().enable()
+
     def disable(self):
         fishhook.unhook(str, "__getitem__")
+        super().disable()
 
 @register
 class WeakTyping(Idea):
