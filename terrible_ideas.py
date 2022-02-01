@@ -61,7 +61,7 @@ class IterableInt(Idea):
     def enable(self):
         @fishhook.hook(int)
         def __iter__(self):
-            yield from range(self)
+            return range(self)
 
         super().enable()
 
