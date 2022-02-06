@@ -20,6 +20,7 @@ By importing a feature, it is enabled automatically.
 - `float_slicing`: `"wat"[0.5:] == "vat"`
 - `weak_typing`: Allows all kind of operations that normally lead to type
   errors, e.g. adding a string and a list
+- `mutable_tuples`: Allows assigning to tuple elements
 
 ## Contributing
 

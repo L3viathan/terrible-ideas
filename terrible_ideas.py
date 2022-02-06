@@ -1,4 +1,5 @@
 import builtins
+import ctypes
 import fishhook
 
 IDEAS = {}
@@ -174,6 +175,26 @@ class WeakTyping(Idea):
         fishhook.unhook(str, "__sub__")
         if not IS_IPYTHON:
             fishhook.unhook(list, "__add__")
+        super().disable()
+
+class MutableTuples(Idea):
+    def enable(self):
+        @fishhook.hook(tuple)
+        def __setitem__(self, idx, item):
+            old_value = self[idx]
+            element_ptr = ctypes.c_longlong.from_address(id(self) + (3 + idx)*8)
+            element_ptr.value = id(item)
+
+            ref_count = ctypes.c_longlong.from_address(id(item))
+            ref_count.value += 1
+
+            ref_count = ctypes.c_longlong.from_address(id(old_value))
+            ref_count.value -= 1
+
+        super().enable()
+
+    def disable(self):
+        fishhook.unhook(tuple, "__setitem__")
         super().disable()
 
 
