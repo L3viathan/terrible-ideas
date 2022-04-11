@@ -177,6 +177,7 @@ class WeakTyping(Idea):
             fishhook.unhook(list, "__add__")
         super().disable()
 
+@register
 class MutableTuples(Idea):
     def enable(self):
         @fishhook.hook(tuple)
