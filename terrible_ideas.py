@@ -1,5 +1,8 @@
 import builtins
 import ctypes
+from collections.abc import Mapping, Sequence
+from numbers import Number
+
 import fishhook
 
 IDEAS = {}
