@@ -90,6 +90,7 @@ class SpellcheckClasses(Idea):
         builtins.__build_class__ = spelcheck.old
         super().disable()
 
+
 @register
 class FloatSlicing(Idea):
     def enable(self):
@@ -117,6 +118,7 @@ class FloatSlicing(Idea):
         fishhook.unhook(str, "__getitem__")
         super().disable()
 
+
 @register
 class WeakTyping(Idea):
     def enable(self):
@@ -139,6 +141,114 @@ class WeakTyping(Idea):
                 return {self: None, **other}
             return fishhook.orig(self, other)
 
+        @fishhook.hook(dict)
+        def __add__(self, other):
+            if isinstance(other, Mapping):
+                res = {}
+                for k in self.keys() | other.keys():
+                    if k in self and k not in other:
+                        res[k] = self[v]
+                    elif k not in self and k in other:
+                        res[k] = other[v]
+                    elif isinstance(self[k], Number) and isinstance(other[k], Number):
+                        res[k] = self[k] + other[k]
+                    else:
+                        res[k] = other[k]
+                return res
+
+            if isinstance(other, Sequence):
+                return self + dict(other)
+
+            if isinstance(other, Number):
+                res = self.copy()
+                for k, v in res.items():
+                    if isinstance(v, Number):
+                        res[k] = v + other
+                return res
+            else:
+                return self
+
+        @fishhook.hook(dict)
+        def __mul__(self, other):
+            if isinstance(other, Mapping):
+                res = {}
+                for k in self.keys() | other.keys():
+                    if k in self and k not in other:
+                        res[k] = self[v]
+                    elif k not in self and k in other:
+                        res[k] = other[v]
+                    elif isinstance(self[k], Number) and isinstance(other[k], Number):
+                        res[k] = self[k] * other[k]
+                    else:
+                        res[k] = other[k]
+                return res
+
+            if isinstance(other, Sequence):
+                return self * dict(other)
+
+            if isinstance(other, Number):
+                res = self.copy()
+                for k, v in res.items():
+                    if isinstance(v, Number):
+                        res[k] = v * other
+                return res
+            else:
+                return self
+
+        @fishhook.hook(dict)
+        def __truediv__(self, other):
+            if isinstance(other, Mapping):
+                res = {}
+                for k in self.keys() | other.keys():
+                    if k in self and k not in other:
+                        res[k] = self[v]
+                    elif k not in self and k in other:
+                        res[k] = other[v]
+                    elif isinstance(self[k], Number) and isinstance(other[k], Number):
+                        res[k] = self[k] / other[k]
+                    else:
+                        res[k] = other[k]
+                return res
+
+            if isinstance(other, Sequence):
+                return self / dict(other)
+
+            if isinstance(other, Number):
+                res = self.copy()
+                for k, v in res.items():
+                    if isinstance(v, Number):
+                        res[k] = v / other
+                return res
+            else:
+                return self
+
+        @fishhook.hook(dict)
+        def __sub__(self, other):
+            if isinstance(other, Mapping):
+                res = {}
+                for k in self.keys() | other.keys():
+                    if k in self and k not in other:
+                        res[k] = self[v]
+                    elif k not in self and k in other:
+                        res[k] = other[v]
+                    elif isinstance(self[k], Number) and isinstance(other[k], Number):
+                        res[k] = self[k] - other[k]
+                    else:
+                        res[k] = other[k]
+                return res
+
+            if isinstance(other, Sequence):
+                return self - dict(other)
+
+            if isinstance(other, Number):
+                res = self.copy()
+                for k, v in res.items():
+                    if isinstance(v, Number):
+                        res[k] = v - other
+                return res
+            else:
+                return self
+
         @fishhook.hook(str)
         def __sub__(self, other):
             error = TypeError(
@@ -156,6 +266,7 @@ class WeakTyping(Idea):
             raise error
 
         if not IS_IPYTHON:
+
             @fishhook.hook(list)
             def __add__(self, other):
                 if isinstance(other, (int, float, type(None))):
@@ -171,11 +282,14 @@ class WeakTyping(Idea):
         super().enable()
 
     def disable(self):
+        fishhook.unhook(dict, "__add__")
+        fishhook.unhook(dict, "__sub__")
         fishhook.unhook(str, "__add__")
         fishhook.unhook(str, "__sub__")
         if not IS_IPYTHON:
             fishhook.unhook(list, "__add__")
         super().disable()
+
 
 @register
 class MutableTuples(Idea):
@@ -183,7 +297,7 @@ class MutableTuples(Idea):
         @fishhook.hook(tuple)
         def __setitem__(self, idx, item):
             old_value = self[idx]
-            element_ptr = ctypes.c_longlong.from_address(id(self) + (3 + idx)*8)
+            element_ptr = ctypes.c_longlong.from_address(id(self) + (3 + idx) * 8)
             element_ptr.value = id(item)
 
             ref_count = ctypes.c_longlong.from_address(id(item))

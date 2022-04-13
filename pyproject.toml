@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "terrible-ideas"
-version = "0.3.2"
+version = "0.4.0"
 description = "Frequently asked-for missing anti-features"
 authors = ["L3viathan <git@l3vi.de>"]
 license = "WTFPL"
