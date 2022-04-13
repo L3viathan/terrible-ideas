@@ -170,6 +170,7 @@ class WeakTyping(Idea):
                 return res
             else:
                 return self
+        fishhook.hook(dict, name="__radd__")(__add__)
 
         @fishhook.hook(dict)
         def __mul__(self, other):
@@ -197,6 +198,7 @@ class WeakTyping(Idea):
                 return res
             else:
                 return self
+        fishhook.hook(dict, name="__rmul__")(__mul__)
 
         @fishhook.hook(dict)
         def __truediv__(self, other):
@@ -286,7 +288,11 @@ class WeakTyping(Idea):
 
     def disable(self):
         fishhook.unhook(dict, "__add__")
+        fishhook.unhook(dict, "__radd__")
         fishhook.unhook(dict, "__sub__")
+        fishhook.unhook(dict, "__mul__")
+        fishhook.unhook(dict, "__rmul__")
+        fishhook.unhook(dict, "__truediv__")
         fishhook.unhook(str, "__add__")
         fishhook.unhook(str, "__sub__")
         if not IS_IPYTHON:
@@ -309,10 +315,18 @@ class MutableTuples(Idea):
             ref_count = ctypes.c_longlong.from_address(id(old_value))
             ref_count.value -= 1
 
+        @fishhook.hook(tuple)
+        def resize(self, new_size):
+            size = ctypes.c_longlong.from_address(id(self) + 2 * 8)
+            if new_size > size.value:
+                warnings.warn("New tuple size is larger than old size")
+            size.value = new_size
+
         super().enable()
 
     def disable(self):
         fishhook.unhook(tuple, "__setitem__")
+        fishhook.unhook(tuple, "resize")
         super().disable()
 
 
