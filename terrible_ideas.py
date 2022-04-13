@@ -150,9 +150,9 @@ class WeakTyping(Idea):
                 res = {}
                 for k in self.keys() | other.keys():
                     if k in self and k not in other:
-                        res[k] = self[v]
+                        res[k] = self[k]
                     elif k not in self and k in other:
-                        res[k] = other[v]
+                        res[k] = other[k]
                     elif isinstance(self[k], Number) and isinstance(other[k], Number):
                         res[k] = self[k] + other[k]
                     else:
@@ -177,9 +177,9 @@ class WeakTyping(Idea):
                 res = {}
                 for k in self.keys() | other.keys():
                     if k in self and k not in other:
-                        res[k] = self[v]
+                        res[k] = self[k]
                     elif k not in self and k in other:
-                        res[k] = other[v]
+                        res[k] = other[k]
                     elif isinstance(self[k], Number) and isinstance(other[k], Number):
                         res[k] = self[k] * other[k]
                     else:
@@ -204,9 +204,9 @@ class WeakTyping(Idea):
                 res = {}
                 for k in self.keys() | other.keys():
                     if k in self and k not in other:
-                        res[k] = self[v]
+                        res[k] = self[k]
                     elif k not in self and k in other:
-                        res[k] = other[v]
+                        res[k] = other[k]
                     elif isinstance(self[k], Number) and isinstance(other[k], Number):
                         res[k] = self[k] / other[k]
                     else:
@@ -231,9 +231,9 @@ class WeakTyping(Idea):
                 res = {}
                 for k in self.keys() | other.keys():
                     if k in self and k not in other:
-                        res[k] = self[v]
+                        res[k] = self[k]
                     elif k not in self and k in other:
-                        res[k] = other[v]
+                        res[k] = other[k]
                     elif isinstance(self[k], Number) and isinstance(other[k], Number):
                         res[k] = self[k] - other[k]
                     else:
