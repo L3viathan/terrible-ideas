@@ -21,6 +21,7 @@ By importing a feature, it is enabled automatically.
 - `weak_typing`: Allows all kind of operations that normally lead to type
   errors, e.g. adding a string and a list
 - `mutable_tuples`: Allows assigning to tuple elements
+- `mutable_strings`: Allows resizing and changing strings
 
 ## Contributing
 
