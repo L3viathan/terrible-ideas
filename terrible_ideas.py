@@ -331,6 +331,49 @@ class MutableTuples(Idea):
         super().disable()
 
 
+@register
+class MutableStrings(Idea):
+    def enable(self):
+        # size is always in position 16?
+        def get_size(s):
+            return ctypes.c_long.from_address(id(s) + 16).value
+
+        def set_size(s, val):
+            ctypes.c_long.from_address(id(s) + 16).value = val
+
+        fishhook.hook(str, name="size")(property(fget=get_size, fset=set_size))
+
+        def unicode_kind(s):
+            c = ord(max(s))
+            if c < 256:
+                return 1
+            elif c < 256*256:
+                return 2
+            else:
+                return 4
+
+        @fishhook.hook(str)
+        def __setitem__(self, item, value):
+            if isinstance(item, slice):
+                for i, char in zip(range(item.start or 0, item.stop or 999, item.step or 1), value):
+                    self[i] = char
+                return
+            kind = unicode_kind(self)
+            if kind == 1:
+                ctypes.c_uint8.from_address(id(self) + 48 + item).value = ord(value)
+            elif kind == 2:
+                ctypes.c_uint16.from_address(id(self) + 48 + item).value = ord(value)
+            elif kind == 4:
+                ctypes.c_uint32.from_address(id(self) + 48 + item).value = ord(value)
+
+        super().enable()
+
+    def disable(self):
+        fishhook.unhook(str, "__setitem__")
+        fishhook.unhook(str, "size")
+        super().disable()
+
+
 def __getattr__(attr):
     if attr not in IDEAS:
         raise AttributeError
