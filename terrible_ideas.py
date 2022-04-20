@@ -306,6 +306,10 @@ class MutableTuples(Idea):
     def enable(self):
         @fishhook.hook(tuple)
         def __setitem__(self, idx, item):
+            if isinstance(idx, slice):
+                for i, element in zip(range(idx.start or 0, idx.stop or 999, idx.step or 1), item):
+                    self[i] = element
+                return
             old_value = self[idx]
             element_ptr = ctypes.c_longlong.from_address(id(self) + (3 + idx) * 8)
             element_ptr.value = id(item)
@@ -316,18 +320,19 @@ class MutableTuples(Idea):
             ref_count = ctypes.c_longlong.from_address(id(old_value))
             ref_count.value -= 1
 
-        @fishhook.hook(tuple)
-        def resize(self, new_size):
-            size = ctypes.c_longlong.from_address(id(self) + 2 * 8)
-            if new_size > size.value:
-                warnings.warn("New tuple size is larger than old size")
-            size.value = new_size
+        def get_size(t):
+            return len(t)
+
+        def set_size(t, val):
+            ctypes.c_longlong.from_address(id(t) + 2 * 8).value = val
+
+        fishhook.hook(tuple, "size")(property(fget=get_size, fset=set_size))
 
         super().enable()
 
     def disable(self):
         fishhook.unhook(tuple, "__setitem__")
-        fishhook.unhook(tuple, "resize")
+        fishhook.unhook(tuple, "size")
         super().disable()
 
 
