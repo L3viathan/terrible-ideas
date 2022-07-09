@@ -382,20 +382,27 @@ class MutableStrings(Idea):
 @register
 class DictSlicing(Idea):
     def enable(self):
-        @fishhook.hook(dict)
-        def __getitem__(self, item):
-            if not isinstance(item, slice):
-                return fishhook.orig(self, item)
-            sliced_keys = list(self.keys())[item]
-            return {k: v for k, v in self.items() if k in sliced_keys}
+        # for some reason, just using fishhook.orig crashes when _both_ the
+        # following hooks are defined (only one is fine). It works if we first
+        # get the original wrappers:
+        orig_set = dict.__setitem__
+        orig_get = dict.__getitem__
 
         @fishhook.hook(dict)
         def __setitem__(self, item, values):
             if not isinstance(item, slice):
-                return fishhook.orig(self, item, values)
+                return orig_set(self, item, values)
             sliced_keys = list(self.keys())[item]
             for key, value in zip(sliced_keys, values):
                 self[key] = value
+
+        @fishhook.hook(dict)
+        def __getitem__(self, item):
+            if not isinstance(item, slice):
+                return orig_get(self, item)
+            sliced_keys = list(self.keys())[item]
+            return {k: v for k, v in self.items() if k in sliced_keys}
+
 
     def disable(self):
         fishhook.unhook(dict, "__getitem__")
