@@ -379,6 +379,7 @@ class MutableStrings(Idea):
         super().disable()
 
 
+@register
 class DictSlicing(Idea):
     def enable(self):
         @fishhook.hook(dict)
