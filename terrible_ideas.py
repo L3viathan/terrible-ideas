@@ -3,6 +3,7 @@ import ctypes
 import warnings
 from collections.abc import Mapping, Sequence
 from numbers import Number
+from itertools import islice
 
 import fishhook
 
@@ -392,7 +393,7 @@ class DictSlicing(Idea):
         def __setitem__(self, item, values):
             if not isinstance(item, slice):
                 return orig_set(self, item, values)
-            sliced_keys = list(self.keys())[item]
+            sliced_keys = islice(self.keys(), item.start, item.stop, item.step)
             for key, value in zip(sliced_keys, values):
                 self[key] = value
 
@@ -400,8 +401,7 @@ class DictSlicing(Idea):
         def __getitem__(self, item):
             if not isinstance(item, slice):
                 return orig_get(self, item)
-            sliced_keys = list(self.keys())[item]
-            return {k: v for k, v in self.items() if k in sliced_keys}
+            return dict(islice(self.items(), item.start, item.stop, item.step))
 
 
     def disable(self):
