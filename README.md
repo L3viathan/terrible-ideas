@@ -22,6 +22,7 @@ By importing a feature, it is enabled automatically.
   errors, e.g. adding a string and a list
 - `mutable_tuples`: Allows assigning to tuple elements
 - `mutable_strings`: Allows resizing and changing strings
+- `dict_slicing`: Allows `some_dict[:3]` and `some_dict[:2] = ("some", "values")`
 
 ## Contributing
 
